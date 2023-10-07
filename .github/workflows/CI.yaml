@@ -1,0 +1,44 @@
+ #Workflow file
+name: NodeProject CI
+
+on:
+  push: 
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  # Job 1
+  Azure_Setup:
+    runs-on: [test-runner, self-hosted]
+    environment: CIEnvironment
+    env:
+      AZ_UNAME: ${{ secrets.AZ_UNAME }}
+      AZ_PASSWD: ${{ secrets.AZ_PASSWD }}
+      AZ_TENANT: ${{ secrets.AZ_TENANT }}
+    shell: bash
+    run: |
+      az login --service-principal --username ${{ env.AZ_UNAME }} --password ${{ env.AZ_PASSWD }} --tenant ${{ env.AZ_TENANT }}
+
+  # Job 2
+  Docker_build:
+    runs-on: [test-runner2, self-hosted]
+    environment: CIEnvironment
+    env:
+      ACR_NAME: ${{ secrets.ACR_NAME }}
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+      - name: Perform Docker Build 🐋
+        uses: ./.github/actions/docker_build_action/
+
+  # Job 3
+  Push_to_ACR:
+    runs-on: [test-runner2, self-hosted]
+    environment: CIEnvironment
+    env:
+      ACR_NAME: ${{ secrets.ACR_NAME }}
+    needs: [Docker_build]
+    steps:
+      - name: Push Built Image to ACR
+        uses: ./.github/actions/image_push_action/

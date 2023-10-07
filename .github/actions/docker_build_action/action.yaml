@@ -1,0 +1,20 @@
+name: docker_build
+description: Build containers and set up the docker system
+runs:
+  using: composite
+  steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v3
+
+    - name: Cleanup Dangling Docker Images
+      shell: bash
+      if: always()
+      run: docker image prune -f
+    
+    - name: Build Image
+      # Below code Specifies the directory where our code is residing
+      # Used bash shell since the runner is a Linux VM
+      shell: bash
+      run: 
+        # Buildx is a drop-in replacement for the legacy build client used in earlier versions of Docker Engine.
+        docker buildx build -t ${{ env.ACR_NAME }}.azurecr.io/nodeproject:v${{github.run_number}} .
