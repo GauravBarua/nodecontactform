@@ -7,5 +7,5 @@ runs:
       shell: bash
       run: |
         az acr login --name ${{ env.ACR_NAME }}
-        docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:v${{github.run_number}}
+        docker push ${{ env.ACR_NAME }}.azurecr.io/nodeproject:v${{github.run_number}}
 
